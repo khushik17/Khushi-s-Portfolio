@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khushi Kabra — Mario Portfolio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Press Start 2P',monospace;background:#5c94fc;user-select:none;}
+
+#cur{position:fixed;top:0;left:0;width:26px;height:28px;pointer-events:none;z-index:99999;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 28'%3E%3Cpolygon points='3,2 3,22 8,17 11,24 14,22 11,15 18,15' fill='%23ffffff' stroke='%23000000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat 0 0/contain;}
+
+#game{position:relative;width:100vw;height:100vh;overflow:hidden;}
+#sky{position:absolute;inset:0;background:linear-gradient(180deg,#5c94fc 0%,#89b6ff 60%,#c5e5ff 100%);}
+#world{position:absolute;bottom:0;left:0;width:6000px;height:100vh;}
+#ggrass{position:absolute;bottom:80px;width:100vw;height:16px;background:#58b858;border-top:4px solid #88e888;border-bottom:4px solid #208020;z-index:10;}
+#gdirt{position:absolute;bottom:0;width:100vw;height:80px;background:repeating-linear-gradient(90deg,#e8a020 0,#e8a020 48px,#c07010 48px,#c07010 50px);border-top:6px solid #f0c040;z-index:10;}
+
+.cloud{position:absolute;font-size:56px;animation:drift linear infinite;opacity:.9;}
+@keyframes drift{from{transform:translateX(6100px);}to{transform:translateX(-200px);}}
+.hill{position:absolute;bottom:96px;border-radius:50% 50% 0 0;background:#3c8c20;border-top:4px solid #58c030;}
+
+.pipe{position:absolute;bottom:96px;cursor:pointer;z-index:20;transition:filter .1s;}
+.pipe:hover{filter:brightness(1.25);}
+.pcap{width:80px;height:28px;margin-left:-8px;background:linear-gradient(90deg,#68c040,#a8f050 30%,#58a030 70%,#385020);border:4px solid #1a3010;border-bottom:none;border-radius:6px 6px 0 0;}
+.pbody{width:64px;background:linear-gradient(90deg,#58b030,#88e040 30%,#58a030 70%,#285020);border-left:4px solid #80d030;border-right:4px solid #1a3010;}
+.ptag{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font-size:5.5px;color:#fff;white-space:nowrap;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.72);padding:2px 6px;border-radius:3px;}
+
+.blk{display:inline-block;width:48px;height:48px;background:#e09020;border:3px solid #b07010;border-top-color:#f8d050;border-left-color:#f8d050;box-shadow:inset 3px 3px 0 #fce870,inset -3px -3px 0 #906010;}
+.qblk{position:absolute;z-index:20;width:48px;height:48px;background:#e09020;border:3px solid #b07010;border-top-color:#f8d050;border-left-color:#f8d050;box-shadow:inset 3px 3px 0 #fce870,inset -3px -3px 0 #906010;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;animation:qb .5s ease-in-out infinite alternate;}
+@keyframes qb{from{transform:translateY(0);}to{transform:translateY(-6px);}}
+
+.cr{position:absolute;bottom:96px;cursor:pointer;z-index:20;text-align:center;transition:transform .15s;}
+.cr:hover{transform:scale(1.15) translateY(-5px);}
+.cremoji{font-size:50px;line-height:1;display:block;}
+.ctag{font-size:5.5px;color:#fff;white-space:nowrap;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.72);padding:2px 5px;border-radius:3px;margin-top:3px;display:block;}
+
+/* SMOOTH COIN — gentle float up-down, NO spin */
+.coin{
+  position:absolute;z-index:15;font-size:22px;line-height:1;cursor:pointer;
+  animation:coinFloat 1.4s ease-in-out infinite alternate;
+  transition:opacity .25s, transform .15s;
+}
+@keyframes coinFloat{
+  from{transform:translateY(0px);}
+  to{transform:translateY(-7px);}
+}
+.coin:hover{transform:scale(1.25) translateY(-4px);}
+.coin.collected{opacity:0;pointer-events:none;transform:translateY(-30px) scale(1.4);}
+
+#mario{position:absolute;bottom:96px;left:100px;z-index:50;image-rendering:pixelated;}
+
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:10px 20px;z-index:500;background:linear-gradient(180deg,rgba(0,0,0,.65) 0%,transparent 100%);pointer-events:none;}
+.ht{color:#fff;font-size:8px;text-shadow:2px 2px 0 #000;}
+
+#hint{display:none;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);color:#fff;font-size:7px;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.85);padding:7px 16px;border:2px solid #ffd700;border-radius:3px;z-index:500;pointer-events:none;animation:blnk .8s step-end infinite;white-space:nowrap;}
+#pgbar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);color:#fff;font-size:6px;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.55);padding:4px 12px;border:2px solid rgba(255,255,255,.5);border-radius:3px;z-index:500;pointer-events:none;}
+@keyframes blnk{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* MODAL */
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center;}
+#ov.on{display:flex;}
+#mbox{background:#000088;color:#fff;border:6px solid #2244cc;box-shadow:0 0 0 3px #fff,8px 8px 0 #000;padding:24px 26px;max-width:540px;width:90vw;max-height:84vh;overflow-y:auto;position:relative;animation:popin .25s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes popin{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+#mbox h2{font-size:10px;color:#ffd700;text-shadow:2px 2px 0 #000;border-bottom:3px solid #ffd700;padding-bottom:9px;margin-bottom:13px;}
+#mbox p,#mbox li{font-size:7px;line-height:1.95;}
+#mbox ul{list-style:none;padding:0;}
+#mbox ul li::before{content:"★ ";color:#ffd700;}
+#cbtn{position:absolute;top:9px;right:9px;background:#cc0000;color:#fff;border:3px solid #ff6666;font-family:'Press Start 2P',monospace;font-size:7px;padding:5px 10px;cursor:pointer;box-shadow:2px 2px 0 #000;}
+#cbtn:hover{background:#ff0000;}
+.bdg{display:inline-block;background:#004400;border:2px solid #00aa00;color:#00ff00;font-size:5.5px;padding:3px 7px;margin:2px 2px 2px 0;border-radius:2px;box-shadow:2px 2px 0 #000;}
+.pcard{background:#001144;border:3px solid #0055cc;padding:12px;margin-bottom:12px;}
+.sbr{margin-bottom:8px;}
+.sbt{display:flex;justify-content:space-between;margin-bottom:3px;}
+.sbt span{font-size:6px;}.sbt span:last-child{color:#ffd700;}
+.sbbg{background:#001;border:1px solid #444;height:10px;}
+.sbfl{height:100%;background:linear-gradient(90deg,#009900,#00ff00);box-shadow:0 0 5px #00ff00;}
+.abtn{background:#333;color:#fff;border:2px solid #666;font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 10px;cursor:pointer;margin:6px 5px 0 0;}
+.abtn.g{background:#004400;color:#00ff00;border-color:#00aa00;}
+.abtn:hover{filter:brightness(1.35);}
+.spop{position:fixed;color:#ffd700;font-size:10px;font-weight:bold;text-shadow:2px 2px 0 #000;pointer-events:none;z-index:2000;animation:fup .9s ease-out forwards;}
+@keyframes fup{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-70px);}}
+.fw{position:fixed;border-radius:50%;pointer-events:none;z-index:2000;animation:fbst .6s ease-out forwards;}
+@keyframes fbst{from{transform:scale(0);opacity:1;}to{transform:scale(6);opacity:0;}}
+@keyframes wv{0%,100%{transform:rotate(-8deg);}50%{transform:rotate(8deg);}}
+
+/* INTRO */
+#intro{position:fixed;inset:0;background:#000;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;}
+#intro h1{color:#ffd700;font-size:clamp(13px,2.8vw,20px);text-align:center;text-shadow:4px 4px 0 #cc0000,8px 8px 0 #660000;animation:tp .9s ease-in-out infinite alternate;line-height:1.5;}
+@keyframes tp{from{transform:scale(1);}to{transform:scale(1.04);}}
+.il{font-size:7px;text-shadow:1px 1px 0 #000;}
+#sbtn{background:#cc0000;color:#fff;border:4px solid #ff7777;font-family:'Press Start 2P',monospace;font-size:11px;padding:13px 27px;cursor:pointer;box-shadow:4px 4px 0 #000;margin-top:6px;animation:bb .65s ease-in-out infinite alternate;}
+@keyframes bb{from{transform:translateY(0);box-shadow:4px 4px 0 #000;}to{transform:translateY(-5px);box-shadow:4px 9px 0 #000;}}
+#sbtn:hover{background:#ff2222;animation:none;}
+@keyframes ptitle{from{transform:scale(1);}to{transform:scale(1.05);}}
+
+/* GLITTERY BACKEND ANIMAL */
+@keyframes glitter{
+  0%  {filter:drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 12px #ffaa00);}
+  25% {filter:drop-shadow(0 0 8px #ff88ff) drop-shadow(0 0 16px #aa00ff);}
+  50% {filter:drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 12px #0088ff);}
+  75% {filter:drop-shadow(0 0 8px #aaffaa) drop-shadow(0 0 16px #00cc44);}
+  100%{filter:drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 12px #ffaa00);}
+}
+@keyframes glitterScale{
+  0%,100%{transform:scale(1) rotate(-3deg);}
+  50%{transform:scale(1.12) rotate(3deg);}
+}
+@keyframes shimmer{from{background-position:0%;}to{background-position:200%;}}
+#cr-backend .cremoji{
+  animation:glitter 1.4s ease-in-out infinite, glitterScale 2s ease-in-out infinite;
+  display:inline-block;
+}
+#mpad{position:fixed;bottom:14px;z-index:600;display:flex;justify-content:space-between;width:100%;padding:0 16px;pointer-events:none;}
+.mpbtn{pointer-events:all;width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,0.22);border:3px solid rgba(255,255,255,0.5);font-size:22px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+
+<!-- INTRO -->
+<div id="intro">
+  <div style="font-size:7px;color:#666;letter-spacing:4px;">— PORTFOLIO QUEST —</div>
+  <div style="font-size:52px;animation:tp .9s ease-in-out infinite alternate;">🍄</div>
+  <h1>KHUSHI KABRA<br><span style="font-size:clamp(7px,1.4vw,10px);color:#aaffaa;">FULL STACK DEVELOPER</span></h1>
+  <div class="il" style="color:#ffff55;">← → KEYS TO MOVE</div>
+  <div class="il" style="color:#ffff55;">ENTER KEY = OPEN PANEL</div>
+  <div class="il" style="color:#ff9988;">🌿 GREEN PIPES: PROJECTS</div>
+  <div class="il" style="color:#99ffcc;">🐾 ANIMALS: SKILLS</div>
+  <div class="il" style="color:#ffaaff;">🏰 REACH CASTLE: WIN!</div>
+  <div class="il" style="color:#ffdd88;">🪙 COLLECT COINS: SCORE</div>
+  <button id="sbtn" onclick="startGame()">▶ PRESS START</button>
+  <div style="font-size:6px;color:#444;animation:blnk 1s step-end infinite;margin-top:4px;">© 2024 KHUSHI KABRA</div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="ht">KHUSHI<br><span style="color:#ffd700;" id="sel">000000</span></div>
+  <div class="ht" style="text-align:center;">🍄 PORTFOLIO QUEST 🍄<br><span style="font-size:6px;color:#aaffaa;">ENTER = INTERACT</span></div>
+  <div class="ht" style="text-align:right;">🪙×<span id="cel">0</span><br><span style="font-size:6px;color:#ff9988;">👁 <span id="viewCount">0</span> VIEWS</span></div>
+</div>
+<div id="hint">PRESS ENTER TO INTERACT ⬆</div>
+<div id="pgbar">WORLD: <span id="pgel">0</span>%</div>
+
+<!-- GAME -->
+<div id="game">
+  <div id="sky"></div>
+  <div id="world">
+
+    <!-- Clouds -->
+    <div class="cloud" style="top:50px;animation-duration:26s;">☁️</div>
+    <div class="cloud" style="top:85px;animation-duration:33s;animation-delay:-9s;">☁️</div>
+    <div class="cloud" style="top:44px;animation-duration:21s;animation-delay:-5s;font-size:70px;">☁️</div>
+    <div class="cloud" style="top:68px;animation-duration:30s;animation-delay:-16s;">☁️</div>
+    <div class="cloud" style="top:55px;animation-duration:19s;animation-delay:-3s;font-size:42px;">☁️</div>
+    <div class="cloud" style="top:76px;animation-duration:28s;animation-delay:-12s;">☁️</div>
+    <div style="position:fixed;top:16px;right:160px;font-size:68px;pointer-events:none;z-index:5;filter:drop-shadow(0 0 14px #ffdd00);">☀️</div>
+
+    <!-- Hills -->
+    <div class="hill" style="left:120px;width:320px;height:125px;"></div>
+    <div class="hill" style="left:280px;width:170px;height:78px;background:#4a9c28;border-top-color:#68d040;"></div>
+    <div class="hill" style="left:1050px;width:350px;height:138px;"></div>
+    <div class="hill" style="left:2350px;width:270px;height:105px;"></div>
+    <div class="hill" style="left:3650px;width:390px;height:150px;"></div>
+    <div class="hill" style="left:4900px;width:290px;height:115px;"></div>
+
+    <!-- ABOUT PIPE -->
+    <div class="pipe" id="pipe-about" style="left:360px;" onclick="openModal('about')">
+      <div class="pcap"></div><div class="pbody" style="height:80px;"></div>
+      <div class="ptag">ABOUT ME</div>
+    </div>
+
+    <!-- YOSHI — Frontend -->
+    <div class="cr" id="cr-frontend" style="left:660px;" onclick="openModal('skill-frontend')">
+      <span class="cremoji">🦎</span><span class="ctag">FRONTEND</span>
+    </div>
+
+    <!-- PIPE 1 — Chat App -->
+    <div class="pipe" id="pipe-p1" style="left:900px;" onclick="openModal('proj1')">
+      <div class="pcap"></div><div class="pbody" style="height:105px;"></div>
+      <div class="ptag">CHAT APP</div>
+    </div>
+    <div style="position:absolute;left:840px;bottom:246px;display:flex;"><div class="blk"></div><div class="blk"></div><div class="blk"></div></div>
+    <div class="qblk" style="left:900px;bottom:340px;" onclick="openModal('proj1')">💬</div>
+
+    <!-- KOOPA — Backend -->
+    <div class="cr" id="cr-backend" style="left:1140px;" onclick="openModal('skill-backend')">
+      <span class="cremoji">🐢</span><span class="ctag">BACKEND</span>
+    </div>
+
+    <!-- PIPE 2 — AstroCall -->
+    <div class="pipe" id="pipe-p2" style="left:1420px;" onclick="openModal('proj2')">
+      <div class="pcap"></div><div class="pbody" style="height:120px;"></div>
+      <div class="ptag">ASTROCALL</div>
+    </div>
+    <div style="position:absolute;left:1560px;bottom:228px;display:flex;"><div class="blk"></div><div class="blk"></div></div>
+
+    <!-- TOAD — Databases -->
+    <div class="cr" id="cr-db" style="left:1790px;filter:drop-shadow(0 0 10px #00ff88);" onclick="openModal('skill-db')">
+      <span class="cremoji">🍄</span><span class="ctag">DATABASES</span>
+    </div>
+
+    <!-- PIPE 3 — UI/UX -->
+    <div class="pipe" id="pipe-p3" style="left:2060px;" onclick="openModal('proj3')">
+      <div class="pcap"></div><div class="pbody" style="height:95px;"></div>
+      <div class="ptag">UI/UX DESIGN</div>
+    </div>
+    <div style="position:absolute;left:2240px;bottom:258px;display:flex;"><div class="blk"></div><div class="blk"></div><div class="blk"></div></div>
+
+    <!-- GOOMBA — Languages -->
+    <div class="cr" id="cr-lang" style="left:2590px;" onclick="openModal('skill-lang')">
+      <span class="cremoji">👾</span><span class="ctag">LANGUAGES</span>
+    </div>
+
+    <div style="position:absolute;left:2870px;bottom:208px;display:flex;"><div class="blk"></div><div class="blk"></div></div>
+
+    <!-- PARROT — Tools -->
+    <div class="cr" id="cr-tools" style="left:3250px;" onclick="openModal('skill-tools')">
+      <span class="cremoji">🦜</span><span class="ctag">DEV TOOLS</span>
+    </div>
+
+    <!-- FOX — Leadership -->
+    <div class="cr" id="cr-lead" style="left:3870px;" onclick="openModal('leadership')">
+      <span class="cremoji">🦊</span><span class="ctag">LEADERSHIP</span>
+    </div>
+    <div style="position:absolute;left:4160px;bottom:238px;display:flex;"><div class="blk"></div><div class="blk"></div><div class="blk"></div></div>
+
+    <!-- PENGUIN — Other Skills -->
+    <div class="cr" id="cr-other" style="left:4490px;" onclick="openModal('skill-other')">
+      <span class="cremoji">🐧</span><span class="ctag">EXTRAS</span>
+    </div>
+
+    <!-- CONTACT PIPE -->
+    <div class="pipe" id="pipe-contact" style="left:4790px;" onclick="openModal('contact')">
+      <div class="pcap"></div><div class="pbody" style="height:92px;"></div>
+      <div class="ptag">CONTACT</div>
+    </div>
+
+    <!-- FLAG -->
+    <div style="position:absolute;left:5510px;bottom:96px;">
+      <div style="width:10px;height:228px;background:linear-gradient(180deg,#ddd,#888);border:2px solid #555;margin:0 auto;border-radius:3px;"></div>
+      <div style="position:absolute;top:4px;left:12px;font-size:36px;animation:wv .75s ease-in-out infinite;">🚩</div>
+    </div>
+
+    <!-- CASTLE -->
+    <div id="cel-castle" style="position:absolute;left:5610px;bottom:96px;cursor:pointer;z-index:20;text-align:center;" onclick="openModal('castle')">
+      <div style="font-size:138px;line-height:1;filter:drop-shadow(4px 4px 0 rgba(0,0,0,.45));transition:transform .2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">🏰</div>
+      <div style="color:#ffd700;font-size:6px;text-shadow:2px 2px 0 #000;background:rgba(0,0,0,.65);padding:3px 9px;border:2px solid #ffd700;animation:blnk 1s step-end infinite;margin-top:3px;">PRESS ENTER!</div>
+    </div>
+
+    <!-- COINS — staggered float delays for wave effect -->
+    <span id="c0"  class="coin" style="left:240px;bottom:126px;animation-delay:0s;">🪙</span>
+    <span id="c1"  class="coin" style="left:292px;bottom:126px;animation-delay:.18s;">🪙</span>
+    <span id="c2"  class="coin" style="left:344px;bottom:126px;animation-delay:.36s;">🪙</span>
+    <span id="c3"  class="coin" style="left:510px;bottom:126px;animation-delay:.1s;">🪙</span>
+    <span id="c4"  class="coin" style="left:562px;bottom:126px;animation-delay:.28s;">🪙</span>
+    <span id="c5"  class="coin" style="left:856px;bottom:126px;animation-delay:.2s;">🪙</span>
+    <span id="c6"  class="coin" style="left:920px;bottom:126px;animation-delay:.38s;">🪙</span>
+    <span id="c7"  class="coin" style="left:740px;bottom:126px;animation-delay:.14s;">🪙</span>
+    <span id="c8"  class="coin" style="left:792px;bottom:126px;animation-delay:.32s;">🪙</span>
+    <span id="c9"  class="coin" style="left:1040px;bottom:126px;animation-delay:.08s;">🪙</span>
+    <span id="c10" class="coin" style="left:1092px;bottom:126px;animation-delay:.26s;">🪙</span>
+    <span id="c11" class="coin" style="left:1144px;bottom:126px;animation-delay:.44s;">🪙</span>
+    <span id="c12" class="coin" style="left:1578px;bottom:126px;animation-delay:.16s;">🪙</span>
+    <span id="c13" class="coin" style="left:1626px;bottom:126px;animation-delay:.34s;">🪙</span>
+    <span id="c14" class="coin" style="left:1700px;bottom:126px;animation-delay:.12s;">🪙</span>
+    <span id="c15" class="coin" style="left:1752px;bottom:126px;animation-delay:.30s;">🪙</span>
+    <span id="c16" class="coin" style="left:1960px;bottom:126px;animation-delay:.18s;">🪙</span>
+    <span id="c17" class="coin" style="left:2012px;bottom:126px;animation-delay:.36s;">🪙</span>
+    <span id="c18" class="coin" style="left:2064px;bottom:126px;animation-delay:.54s;">🪙</span>
+    <span id="c19" class="coin" style="left:2258px;bottom:126px;animation-delay:.2s;">🪙</span>
+    <span id="c20" class="coin" style="left:2306px;bottom:126px;animation-delay:.38s;">🪙</span>
+    <span id="c21" class="coin" style="left:2354px;bottom:126px;animation-delay:.56s;">🪙</span>
+    <span id="c22" class="coin" style="left:2730px;bottom:126px;animation-delay:.10s;">🪙</span>
+    <span id="c23" class="coin" style="left:2782px;bottom:126px;animation-delay:.28s;">🪙</span>
+    <span id="c24" class="coin" style="left:2888px;bottom:126px;animation-delay:.18s;">🪙</span>
+    <span id="c25" class="coin" style="left:2936px;bottom:126px;animation-delay:.36s;">🪙</span>
+    <span id="c26" class="coin" style="left:3470px;bottom:126px;animation-delay:.12s;">🪙</span>
+    <span id="c27" class="coin" style="left:3522px;bottom:126px;animation-delay:.30s;">🪙</span>
+    <span id="c28" class="coin" style="left:3574px;bottom:126px;animation-delay:.48s;">🪙</span>
+    <span id="c29" class="coin" style="left:4178px;bottom:126px;animation-delay:.20s;">🪙</span>
+    <span id="c30" class="coin" style="left:4226px;bottom:126px;animation-delay:.38s;">🪙</span>
+    <span id="c31" class="coin" style="left:4274px;bottom:126px;animation-delay:.56s;">🪙</span>
+    <span id="c32" class="coin" style="left:4620px;bottom:126px;animation-delay:.10s;">🪙</span>
+    <span id="c33" class="coin" style="left:4672px;bottom:126px;animation-delay:.28s;">🪙</span>
+    <span id="c34" class="coin" style="left:4870px;bottom:126px;animation-delay:.18s;">🪙</span>
+    <span id="c35" class="coin" style="left:4922px;bottom:126px;animation-delay:.36s;">🪙</span>
+    <span id="c36" class="coin" style="left:5080px;bottom:126px;animation-delay:.12s;">🪙</span>
+    <span id="c37" class="coin" style="left:5132px;bottom:126px;animation-delay:.30s;">🪙</span>
+    <span id="c38" class="coin" style="left:5280px;bottom:126px;animation-delay:.18s;">🪙</span>
+    <span id="c39" class="coin" style="left:5332px;bottom:126px;animation-delay:.36s;">🪙</span>
+    <span id="c40" class="coin" style="left:5430px;bottom:126px;animation-delay:.20s;">🪙</span>
+
+    <!-- MARIO — pixel art SVG -->
+    <div id="mario">
+      <svg viewBox="0 0 16 20" width="48" height="60" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;display:block;">
+        <rect x="4" y="0" width="8" height="2" fill="#cc0000"/><rect x="3" y="2" width="10" height="2" fill="#cc0000"/>
+        <rect x="3" y="4" width="2" height="2" fill="#7a3000"/><rect x="5" y="4" width="6" height="2" fill="#f4a261"/><rect x="11" y="4" width="2" height="2" fill="#7a3000"/>
+        <rect x="2" y="6" width="12" height="2" fill="#f4a261"/>
+        <rect x="4" y="6" width="2" height="2" fill="#111"/><rect x="10" y="6" width="2" height="2" fill="#111"/>
+        <rect x="3" y="8" width="3" height="2" fill="#7a3000"/><rect x="6" y="8" width="4" height="2" fill="#f4a261"/><rect x="10" y="8" width="3" height="2" fill="#7a3000"/>
+        <rect x="3" y="10" width="10" height="2" fill="#cc0000"/>
+        <rect x="2" y="11" width="12" height="3" fill="#3355dd"/>
+        <rect x="5" y="12" width="2" height="2" fill="#f0d040"/><rect x="9" y="12" width="2" height="2" fill="#f0d040"/>
+        <rect x="1" y="10" width="2" height="4" fill="#cc0000"/><rect x="13" y="10" width="2" height="4" fill="#cc0000"/>
+        <rect x="1" y="14" width="2" height="2" fill="#f4a261"/><rect x="13" y="14" width="2" height="2" fill="#f4a261"/>
+        <rect x="3" y="14" width="4" height="4" fill="#3355dd"/><rect x="9" y="14" width="4" height="4" fill="#3355dd"/>
+        <rect x="2" y="18" width="5" height="2" fill="#7a3000"/><rect x="9" y="18" width="5" height="2" fill="#7a3000"/>
+      </svg>
+    </div>
+  </div>
+  <div id="ggrass"></div>
+  <div id="gdirt"></div>
+</div>
+
+<!-- MODAL -->
+<div id="ov"><div id="mbox"><button id="cbtn" onclick="closeModal()">✕ CLOSE</button><h2 id="mt"></h2><div id="mb"></div></div></div>
+
+<!-- MOBILE CONTROLS -->
+<div id="mpad">
+  <div style="display:flex;gap:10px;">
+    <div class="mpbtn" id="bL">◀</div>
+    <div class="mpbtn" id="bR">▶</div>
+  </div>
+  <div class="mpbtn" id="bJ">⬆</div>
+</div>
+
+<script>
+// CURSOR
+(function(){var c=document.getElementById('cur');document.addEventListener('mousemove',function(e){c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';});})();
+
+// HELPERS
+function sb(l,p){return '<div class="sbr"><div class="sbt"><span>'+l+'</span><span>'+p+'%</span></div><div class="sbbg"><div class="sbfl" style="width:'+p+'%"></div></div></div>';}
+
+function pc(em,nm,ds,tags,feats,link,linkLabel){
+  var html='<div class="pcard"><div style="font-size:34px;margin-bottom:5px;">'+em+'</div>';
+  html+='<div style="color:#ffd700;font-size:8px;margin-bottom:6px;">'+nm+'</div>';
+  html+='<p style="font-size:7px;line-height:2;margin-bottom:8px;">'+ds+'</p>';
+  html+='<div>'+tags.map(function(t){return '<span class="bdg">'+t+'</span>';}).join('')+'</div></div>';
+  html+='<ul style="margin-bottom:10px;">'+feats.map(function(f){return '<li style="margin:5px 0;">'+f+'</li>';}).join('')+'</ul>';
+  if(link) html+='<button class="abtn g" onclick="window.open(\''+link+'\',\'_blank\')">&#9654; '+linkLabel+'</button>';
+  return html;
+}
+
+function sc(em,sub,bars,tags){
+  return '<div style="text-align:center;font-size:46px;margin:6px 0;">'+em+'</div>'
+    +'<p style="text-align:center;color:#ffd700;font-size:7px;margin-bottom:12px;">'+sub+'</p>'
+    +bars.map(function(b){return sb(b[0],b[1]);}).join('')
+    +'<div style="margin-top:10px;">'+tags.map(function(t){return '<span class="bdg">'+t+'</span>';}).join('')+'</div>';
+}
+
+// ── MODAL DATA — KHUSHI KABRA (from resume) ──
+var MD={
+  about:{
+    t:'🍄 PLAYER: KHUSHI KABRA',
+    b:'<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;">'
+      +'<div style="font-size:52px;line-height:1;">👩‍💻</div>'
+      +'<div>'
+      +'<p style="color:#ffd700;font-size:9px;margin-bottom:6px;">KHUSHI KABRA</p>'
+      +'<p style="margin-bottom:4px;">Full Stack Developer</p>'
+      +'<p style="color:#aaffaa;margin-top:4px;">📍 Indore, India</p>'
+      +'<p style="color:#aaffaa;margin-top:3px;">🎓 Shri G.S. Institute of Tech &amp; Science</p>'
+      +'<p style="color:#aaffaa;margin-top:3px;">⚡ B.E. Electrical Engg · 2023–2027</p>'
+      +'</div></div>'
+      +'<p style="font-size:7px;line-height:2;color:#ccdeff;margin-bottom:10px;">I build beautiful, real world web apps. From real time chat platforms to astrology consultation tools. Passionate about clean UI and solid backend architecture. When not coding, probably on the football field or winning medals! ⚽🏅</p>'
+      +'<div style="margin-bottom:10px;"><span class="bdg">🚀 3 PROJECTS</span><span class="bdg">🏅 SPORTS MEDALS</span><span class="bdg">🎯 OPEN TO WORK</span></div>'
+      +'<div style="background:#001133;border:2px solid #3366ff;padding:8px;font-size:6.5px;line-height:2.2;">'
+      +'📧 khushikabra2005@gmail.com<br>'
+      +'📞 +91 9109889359<br>'
+      +'🐙 github.com/khushik17<br>'
+      +'💼 linkedin.com/in/khushi-kabra-368b8b2b3'
+      +'</div>'
+  },
+
+  proj1:{
+    t:'💬 PIPE 1: CHAT APPLICATION',
+    b:pc('💬','REAL-TIME CHAT APPLICATION',
+      'A real-time chat platform with user search, bot interaction, meme commenting, and live messaging — built with a secure modern stack.',
+      ['React','Node.js','Express','MongoDB','Socket.io','Clerk','Zod'],
+      ['Real-time messaging via Socket.io','Clerk authentication for secure user management','User search + bot interaction + meme commenting','MongoDB for persistent chat history storage','Zod validation for secure backend APIs'],
+      'https://wee-chat.vercel.app','Live Demo → wee-chat.vercel.app')
+  },
+
+  proj2:{
+    t:'🔮 PIPE 2: ASTROCALL',
+    b:pc('🔮','ASTROCALL — VIDEO CONSULTATION PLATFORM',
+      'A full-stack platform connecting seekers and astrologers via real-time video calls and chat. Features dashboards, zodiac wheel, and horoscope insights.',
+      ['Next.js','TypeScript','LiveKit','Firebase'],
+      ['Real-time video calls and chat via LiveKit','Astrologer dashboards: availability, history, ratings, customers','Zodiac wheel feature for horoscope insights','Firebase for data management and app state'],
+      'https://yourastrocall.vercel.app','Live Demo → yourastrocall.vercel.app')
+  },
+
+  proj3:{
+    t:'🎨 PIPE 3: FOOD DELIVERY UI/UX',
+    b:pc('🎨','FOOD DELIVERY APP — FIGMA DESIGN',
+      'A modern food delivery app UI designed in Figma with clean navigation, responsive layouts, and complete user flows from menu to checkout.',
+      ['Figma','UI Design','Prototyping','Wireframing'],
+      ['Modern intuitive navigation and responsive layouts','Wireframes → mockups → interactive prototypes','Cart management and checkout user flows','Focus on smooth, clean visual design system'],
+      'https://www.behance.net/gallery/225656871/App-project','View on Behance')
+  },
+
+  'skill-frontend':{
+    t:'🦎 SKILL: FRONTEND',
+    b:sc('🦎','YOSHI: UI POWERHOUSE',
+      [['React.js',90],['Next.js',85],['Tailwind CSS',88],['Redux',78],['TypeScript',83]],
+      ['React.js','Next.js','Tailwind CSS','Redux','TypeScript','Responsive Design'])
+  },
+
+  'skill-backend':{
+    t:'🐢 SKILL: BACKEND',
+    b:'<div style="text-align:center;font-size:46px;margin:6px 0;animation:glitter 1.4s ease-in-out infinite,glitterScale 2s ease-in-out infinite;display:inline-block;width:100%;">🐢</div>'
+      +'<p style="text-align:center;background:linear-gradient(90deg,#ffd700,#ff88ff,#00ffff,#aaffaa,#ffd700);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:7px;margin-bottom:12px;animation:shimmer 2s linear infinite;">KOOPA: SERVER MASTER ✨</p>'
+      +sb('Node.js',90)+sb('Express.js',90)+sb('REST APIs',90)+sb('Socket.io',82)+sb('LiveKit',76)+sb('JWT',85)
+      +'<div style="margin-top:10px;">'+['Node.js','Express.js','Next.js','REST APIs','Socket.io','LiveKit','JWT','Zod'].map(function(t){return '<span class="bdg" style="border-color:#ff88ff;box-shadow:0 0 6px #ff44ff;">'+t+'</span>';}).join('')+'</div>'
+  },
+
+  'skill-db':{
+    t:'🍄 SKILL: DATABASES',
+    b:sc('🍄','TOAD: DATA KEEPER',
+      [['MongoDB',95],['Firebase',82],['PostgreSQL',78],['Prisma',74],['Mongoose',85]],
+      ['MongoDB','Firebase','PostgreSQL','Prisma','Mongoose'])
+  },
+
+  'skill-lang':{
+    t:'👾 SKILL: LANGUAGES',
+    b:sc('👾','GOOMBA: CODE CRUSHER',
+      [['JavaScript',92],['TypeScript',83],['C/C++',85]],
+      ['JavaScript ES6+','TypeScript','C','C++'])
+  },
+
+  'skill-tools':{
+    t:'🦜 SKILL: DEV TOOLS',
+    b:sc('🦜','PARROT: POWER USER',
+      [['Git',92],['GitHub',90],['Postman',88],['VS Code',95],['npm',84]],
+      ['Git','GitHub','Postman','VS Code','npm','Socket Testing'])
+  },
+
+  leadership:{
+    t:'🦊 LEADERSHIP AND ACHIEVEMENTS',
+    b:'<div style="font-size:32px;text-align:center;margin-bottom:6px;">🦊</div>'
+      +'<p style="text-align:center;color:#ffd700;font-size:7px;margin-bottom:12px;">FOX: TEAM PLAYER</p>'
+      +'<div class="pcard" style="margin-bottom:10px;">'
+      +'<p style="color:#ffd700;font-size:7.5px;margin-bottom:6px;">🏎️ CORE TEAM: GSRACERS CLUB</p>'
+      +'<ul><li style="margin:4px 0;">Contributed across media, electrical, rollcage and sponsorship teams</li>'
+      +'<li style="margin:4px 0;">Electrical wiring, structural design support and social media management</li></ul>'
+      +'</div>'
+      +'<div class="pcard" style="margin-bottom:10px;">'
+      +'<p style="color:#ffd700;font-size:7.5px;margin-bottom:6px;">🪟 TEAM LEADER: AUTOMATED WINDOW SHUTTER</p>'
+      +'<ul><li style="margin:4px 0;">Led IoT based automated window shutter system development</li>'
+      +'<li style="margin:4px 0;">Hardware integration, system design and team coordination</li></ul>'
+      +'</div>'
+      +'<div class="pcard">'
+      +'<p style="color:#ffd700;font-size:7.5px;margin-bottom:6px;">🏅 SPORTS ACHIEVEMENTS</p>'
+      +'<ul><li style="margin:4px 0;">Won 10 medals in football, badminton and volleyball</li>'
+      +'<li style="margin:4px 0;">Inter college sports competitions with strong team leadership</li></ul>'
+      +'</div>'
+  },
+
+  'skill-other':{
+    t:'🐧 OTHER SKILLS',
+    b:sc('🐧','PENGUIN: EXTRA POWER',
+      [['Multer',80],['Nodemailer',78],['Cloudinary',78],['Clerk Auth',82],['Zod',80]],
+      ['Multer','Nodemailer','Cloudinary','Clerk Auth','Zod Validation','Socket.io','LiveKit'])
+  },
+
+  contact:{
+    t:'📬 CONTACT KHUSHI',
+    b:'<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">'
+      +'<a href="mailto:khushikabra2005@gmail.com" style="display:flex;align-items:center;gap:10px;background:#001133;border:2px solid #3366ff;padding:9px 12px;text-decoration:none;color:#fff;font-size:6.5px;border-radius:3px;" onmouseover="this.style.background=\'#002266\'" onmouseout="this.style.background=\'#001133\'"><span style="font-size:16px;">📧</span><span>khushikabra2005@gmail.com</span></a>'
+      +'<a href="tel:+919109889359" style="display:flex;align-items:center;gap:10px;background:#001133;border:2px solid #3366ff;padding:9px 12px;text-decoration:none;color:#fff;font-size:6.5px;border-radius:3px;" onmouseover="this.style.background=\'#002266\'" onmouseout="this.style.background=\'#001133\'"><span style="font-size:16px;">📞</span><span>+91 9109889359</span></a>'
+      +'<a href="https://github.com/khushik17" target="_blank" style="display:flex;align-items:center;gap:10px;background:#001133;border:2px solid #3366ff;padding:9px 12px;text-decoration:none;color:#fff;font-size:6.5px;border-radius:3px;" onmouseover="this.style.background=\'#002266\'" onmouseout="this.style.background=\'#001133\'"><span style="font-size:16px;">🐙</span><span>github.com/khushik17</span></a>'
+      +'<a href="https://linkedin.com/in/khushi-kabra-368b8b2b3" target="_blank" style="display:flex;align-items:center;gap:10px;background:#001133;border:2px solid #3366ff;padding:9px 12px;text-decoration:none;color:#fff;font-size:6.5px;border-radius:3px;" onmouseover="this.style.background=\'#002266\'" onmouseout="this.style.background=\'#001133\'"><span style="font-size:16px;">💼</span><span>linkedin.com/in/khushi-kabra-368b8b2b3</span></a>'
+      +'<div style="display:flex;align-items:center;gap:10px;background:#001133;border:2px solid #3366ff;padding:9px 12px;font-size:6.5px;border-radius:3px;"><span style="font-size:16px;">📍</span><span>Indore, Madhya Pradesh, India</span></div>'
+      +'</div>'
+      +'<div style="background:#003300;border:3px solid #00aa00;padding:10px;text-align:center;">'
+      +'<p style="color:#00ff00;font-size:7px;">AVAILABLE FOR OPPORTUNITIES</p>'
+      +'<p style="color:#aaffaa;font-size:6px;margin-top:5px;">⚡ Building great things with code!</p>'
+      +'</div>'
+  },
+
+  castle:{
+    t:'🏆 LEVEL COMPLETE: YOU WON!',
+    b:'<div style="text-align:center;margin:8px 0;">'
+      +'<div style="font-size:58px;animation:ptitle .6s ease-in-out infinite alternate;">🏆</div>'
+      +'<p style="color:#ffd700;font-size:9px;margin:9px 0;letter-spacing:2px;">CONGRATULATIONS!</p>'
+      +'<p style="color:#aaffaa;font-size:7px;margin-bottom:13px;">You explored Khushi\'s full portfolio. You\'re a legend! 🌟</p>'
+      +'</div>'
+      +'<div style="background:#003300;border:3px solid #00cc00;padding:11px;margin-bottom:12px;text-align:center;">'
+      +'<p style="color:#00ff00;font-size:7px;margin-bottom:5px;">THANKS FOR VISITING!</p>'
+      +'<p style="color:#ccffcc;font-size:6px;line-height:2.2;">Full Stack Developer · Indore, India<br>Let\'s build something awesome together! 🚀</p>'
+      +'</div>'
+      +'<ul>'
+      +'<li style="margin:5px 0;">📧 khushikabra2005@gmail.com</li>'
+      +'<li style="margin:5px 0;">📞 +91 9109889359</li>'
+      +'<li style="margin:5px 0;">🐙 github.com/khushik17</li>'
+      +'<li style="margin:5px 0;">💼 linkedin.com/in/khushi-kabra-368b8b2b3</li>'
+      +'<li style="margin:5px 0;">🔮 yourastrocall.vercel.app</li>'
+      +'<li style="margin:5px 0;">💬 wee-chat.vercel.app</li>'
+      +'</ul>'
+      +'<div style="background:#110033;border:3px solid #6600ff;padding:10px;text-align:center;margin-top:12px;">'
+      +'<p style="color:#cc99ff;font-size:7px;">⭐ MADE WITH ❤️ + MARIO ENERGY ⭐</p>'
+      +'<p style="color:#9966ff;font-size:6px;margin-top:4px;">Khushi Kabra · Full Stack Developer · 2024</p>'
+      +'</div>'
+  }
+};
+
+// COIN DATA — all at ground level
+var CD=[
+  {id:'c0',wx:251,wb:126},{id:'c1',wx:303,wb:126},{id:'c2',wx:355,wb:126},
+  {id:'c3',wx:521,wb:126},{id:'c4',wx:573,wb:126},
+  {id:'c5',wx:856,wb:126},{id:'c6',wx:920,wb:126},
+  {id:'c7',wx:751,wb:126},{id:'c8',wx:803,wb:126},
+  {id:'c9',wx:1040,wb:126},{id:'c10',wx:1092,wb:126},{id:'c11',wx:1144,wb:126},
+  {id:'c12',wx:1578,wb:126},{id:'c13',wx:1626,wb:126},
+  {id:'c14',wx:1700,wb:126},{id:'c15',wx:1752,wb:126},
+  {id:'c16',wx:1960,wb:126},{id:'c17',wx:2012,wb:126},{id:'c18',wx:2064,wb:126},
+  {id:'c19',wx:2258,wb:126},{id:'c20',wx:2306,wb:126},{id:'c21',wx:2354,wb:126},
+  {id:'c22',wx:2730,wb:126},{id:'c23',wx:2782,wb:126},
+  {id:'c24',wx:2888,wb:126},{id:'c25',wx:2936,wb:126},
+  {id:'c26',wx:3470,wb:126},{id:'c27',wx:3522,wb:126},{id:'c28',wx:3574,wb:126},
+  {id:'c29',wx:4178,wb:126},{id:'c30',wx:4226,wb:126},{id:'c31',wx:4274,wb:126},
+  {id:'c32',wx:4620,wb:126},{id:'c33',wx:4672,wb:126},
+  {id:'c34',wx:4870,wb:126},{id:'c35',wx:4922,wb:126},
+  {id:'c36',wx:5080,wb:126},{id:'c37',wx:5132,wb:126},
+  {id:'c38',wx:5280,wb:126},{id:'c39',wx:5332,wb:126},{id:'c40',wx:5430,wb:126}
+];
+
+// INTERACTABLES
+var IT=[
+  {id:'pipe-about', wx:360, hw:80,  key:'about'},
+  {id:'cr-frontend',wx:660, hw:52,  key:'skill-frontend'},
+  {id:'pipe-p1',    wx:900, hw:80,  key:'proj1'},
+  {id:'cr-backend', wx:1140,hw:52,  key:'skill-backend'},
+  {id:'pipe-p2',    wx:1420,hw:80,  key:'proj2'},
+  {id:'cr-db',      wx:1790,hw:52,  key:'skill-db'},
+  {id:'pipe-p3',    wx:2060,hw:80,  key:'proj3'},
+  {id:'cr-lang',    wx:2590,hw:52,  key:'skill-lang'},
+  {id:'cr-tools',   wx:3250,hw:52,  key:'skill-tools'},
+  {id:'cr-lead',    wx:3870,hw:52,  key:'leadership'},
+  {id:'cr-other',   wx:4490,hw:52,  key:'skill-other'},
+  {id:'pipe-contact',wx:4790,hw:80, key:'contact'},
+  {id:'cel-castle', wx:5610,hw:160, key:'castle'}
+];
+
+// No platforms needed — Mario walks on ground only
+
+// ── GAME STATE ──
+var WW=6000, SP=4.0, CL=155, CR=345;
+var mX=100, vX=0, fR=true;
+var camX=0, score=0, coins=0, gOn=false, mOn=false, cool=false, nk=null;
+var keys={}, got={};
+var mEl=document.getElementById('mario');
+var wEl=document.getElementById('world');
+
+// Mobile — only L and R, no jump button
+var mob={L:false,R:false};
+(function(){
+  function grip(id,k){
+    var el=document.getElementById(id); if(!el)return;
+    el.addEventListener('touchstart',function(e){e.preventDefault();mob[k]=true;},{passive:false});
+    el.addEventListener('touchend',  function(e){e.preventDefault();mob[k]=false;},{passive:false});
+    el.addEventListener('mousedown', function(){mob[k]=true;});
+    el.addEventListener('mouseup',   function(){mob[k]=false;});
+  }
+  grip('bL','L'); grip('bR','R');
+  // hide jump button
+  var bj=document.getElementById('bJ'); if(bj)bj.style.display='none';
+})();
+
+// Input — NO jump keys at all
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeModal();return;}
+  if(!gOn)return;
+  if(mOn){if(e.key==='Enter'){closeModal();e.preventDefault();}return;}
+  keys[e.code]=true;
+  if(e.code==='Enter'&&nk&&!cool){openModal(nk);e.preventDefault();}
+  if(['Space','ArrowUp','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+});
+document.addEventListener('keyup',function(e){keys[e.code]=false;});
+
+// ── GAME LOOP ──
+function loop(){
+  requestAnimationFrame(loop);
+  if(!gOn||mOn)return;
+
+  var goL=keys['ArrowLeft']||keys['KeyA']||mob.L;
+  var goR=keys['ArrowRight']||keys['KeyD']||mob.R;
+
+  if(goL){vX=-SP;fR=false;}
+  else if(goR){vX=SP;fR=true;}
+  else{vX*=0.72;if(Math.abs(vX)<0.25)vX=0;}
+
+  mX+=vX;
+
+  // Mario always stays on ground — no mY, no gravity
+  if(mX<0){mX=0;vX=0;}
+  if(mX>WW-48){mX=WW-48;vX=0;}
+
+  var sx=mX-camX;
+  if(sx>CR) camX=mX-CR;
+  if(sx<CL) camX=mX-CL;
+  var mc=WW-window.innerWidth;
+  if(camX<0)camX=0;
+  if(camX>mc)camX=mc;
+
+  wEl.style.transform='translateX('+(-camX)+'px)';
+  mEl.style.left=mX+'px';
+  mEl.style.bottom='96px';
+  mEl.style.transform=fR?'scaleX(1)':'scaleX(-1)';
+
+  // Coin pickup — mario always at ground level
+  for(var ci=0;ci<CD.length;ci++){
+    if(got[ci])continue;
+    var c=CD[ci];
+    var dx=Math.abs((mX+24)-c.wx);
+    // only collect ground-level coins (wb<=130) by walking into them
+    if(c.wb<=130 && dx<34){
+      got[ci]=true;
+      var cel2=document.getElementById(c.id);
+      if(cel2){
+        cel2.classList.add('collected');
+        setTimeout(function(e){e.style.display='none';}(cel2),280);
+      }
+      coins++;score+=200;
+      document.getElementById('cel').textContent=coins;
+      document.getElementById('sel').textContent=('000000'+score).slice(-6);
+      sfxC();
+      pop(c.wx-camX+4, window.innerHeight-180, '+200');
+    }
+  }
+
+  // Proximity highlight
+  nk=null;
+  for(var ii=0;ii<IT.length;ii++){
+    var it=IT[ii];
+    var dist=Math.abs((mX+24)-(it.wx+it.hw/2));
+    var el=document.getElementById(it.id);
+    if(!el)continue;
+    if(dist<70){el.style.outline='3px solid #ffd700';el.style.outlineOffset='3px';if(dist<55)nk=it.key;}
+    else{el.style.outline='none';el.style.outlineOffset='';}
+  }
+
+  document.getElementById('hint').style.display=(nk&&!mOn)?'block':'none';
+  document.getElementById('pgel').textContent=Math.min(100,Math.round((camX/(WW-window.innerWidth))*100));
+}
+
+function openModal(k){
+  if(mOn||cool)return;
+  var d=MD[k];if(!d)return;
+  document.getElementById('mt').innerHTML=d.t;
+  document.getElementById('mb').innerHTML=d.b;
+  document.getElementById('ov').classList.add('on');
+  mOn=true;score+=500;
+  document.getElementById('sel').textContent=('000000'+score).slice(-6);
+  sfxO();fw();
+}
+function closeModal(){
+  document.getElementById('ov').classList.remove('on');
+  mOn=false;cool=true;setTimeout(function(){cool=false;},650);
+}
+
+function pop(x,y,t){
+  var e=document.createElement('div');e.className='spop';e.textContent=t;
+  e.style.left=Math.max(5,x)+'px';e.style.top=Math.max(5,y)+'px';
+  document.body.appendChild(e);setTimeout(function(){e.remove();},950);
+}
+function fw(){
+  var cols=['#ffd700','#ff4444','#44ff88','#44aaff','#ff44ff','#44ffff','#ffaa00'];
+  for(var i=0;i<10;i++){(function(idx){setTimeout(function(){
+    var f=document.createElement('div');f.className='fw';
+    f.style.background=cols[idx%cols.length];
+    f.style.left=(12+Math.random()*76)+'%';f.style.top=(8+Math.random()*42)+'%';
+    var s=7+Math.random()*10;f.style.width=s+'px';f.style.height=s+'px';
+    document.body.appendChild(f);setTimeout(function(){f.remove();},620);
+  },idx*80);})(i);}
+}
+function sfxJ(){try{var a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(380,a.currentTime);o.frequency.exponentialRampToValueAtTime(780,a.currentTime+.12);g.gain.setValueAtTime(.13,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.22);o.start();o.stop(a.currentTime+.22);}catch(e){}}
+function sfxC(){try{var a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(950,a.currentTime);o.frequency.exponentialRampToValueAtTime(1400,a.currentTime+.06);g.gain.setValueAtTime(.16,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.17);o.start();o.stop(a.currentTime+.17);}catch(e){}}
+function sfxO(){try{var a=new AudioContext(),fs=[380,560,780];for(var i=0;i<fs.length;i++){(function(f,t){var o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.13);o.start(t);o.stop(t+.13);})(fs[i],a.currentTime+i*.09);}}catch(e){}}
+
+// VIEWS COUNTER — count only once per browser (not every refresh)
+(function(){
+  try {
+    var key = 'khushi_portfolio_views';
+    var seenKey = 'khushi_portfolio_seen';
+    var v = parseInt(localStorage.getItem(key)||'0');
+    if(!localStorage.getItem(seenKey)){
+      v = v + 1;
+      localStorage.setItem(key, v);
+      localStorage.setItem(seenKey, '1');
+    }
+    document.getElementById('viewCount').textContent = v;
+  } catch(e) {}
+})();
+
+function startGame(){
+  var intro=document.getElementById('intro');
+  intro.style.transition='opacity .4s';
+  intro.style.opacity='0';
+  mX=100; vX=0; fR=true;
+  mEl.style.left='100px';
+  mEl.style.bottom='96px';
+  setTimeout(function(){
+    intro.style.display='none';
+    gOn=true;
+    requestAnimationFrame(loop);
+  },420);
+}
+
+// Click coins directly
+(function(){
+  var cs=document.querySelectorAll('.coin');
+  for(var i=0;i<cs.length;i++){
+    (function(el,idx){
+      el.addEventListener('click',function(){
+        if(got[idx])return;
+        got[idx]=true;
+        el.classList.add('collected');
+        setTimeout(function(){el.style.display='none';},280);
+        coins++;score+=200;
+        document.getElementById('cel').textContent=coins;
+        document.getElementById('sel').textContent=('000000'+score).slice(-6);
+        sfxC();
+      });
+    })(cs[i],i);
+  }
+})();
+</script>
+</body>
+</html>
