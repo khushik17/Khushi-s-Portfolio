@@ -108,17 +108,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Press Start 2P',mo
   #mbox h2{font-size:8px;}
   #mbox p,#mbox li{font-size:6px;}
   .mpbtn{width:52px;height:52px;font-size:20px;}
-  /* Fix ground elements on mobile */
-  #ggrass{bottom:60px;height:12px;}
-  #gdirt{height:60px;}
-  .pipe{bottom:72px;}
-  .cr{bottom:72px;}
-  #mario{bottom:72px;}
-  .coin{bottom:100px;}
-  .hill{bottom:72px;}
-  #mpad{bottom:80px;}
-  #hint{bottom:150px;font-size:6px;}
-  #pgbar{bottom:60px;font-size:5px;}
 }
 @media (max-width:380px){
   #intro h1{font-size:10px;}
@@ -356,7 +345,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Press Start 2P',mo
     <div class="mpbtn" id="bL">←</div>
     <div class="mpbtn" id="bR">→</div>
   </div>
-  <div class="mpbtn" id="bJ" style="display:none;">↑</div>
+  <div class="mpbtn" id="bJ">⬆</div>
 </div>
 
 <script>
@@ -640,8 +629,7 @@ function loop(){
 
   wEl.style.transform='translateX('+(-camX)+'px)';
   mEl.style.left=mX+'px';
-  var groundBottom = window.innerWidth <= 600 ? '72px' : '96px';
-  mEl.style.bottom=groundBottom;
+  mEl.style.bottom='96px';
   mEl.style.transform=fR?'scaleX(1)':'scaleX(-1)';
 
   // Coin pickup — mario always at ground level
