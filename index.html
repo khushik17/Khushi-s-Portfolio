@@ -108,6 +108,17 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Press Start 2P',mo
   #mbox h2{font-size:8px;}
   #mbox p,#mbox li{font-size:6px;}
   .mpbtn{width:52px;height:52px;font-size:20px;}
+  /* Fix ground elements on mobile */
+  #ggrass{bottom:60px;height:12px;}
+  #gdirt{height:60px;}
+  .pipe{bottom:72px;}
+  .cr{bottom:72px;}
+  #mario{bottom:72px;}
+  .coin{bottom:100px;}
+  .hill{bottom:72px;}
+  #mpad{bottom:80px;}
+  #hint{bottom:150px;font-size:6px;}
+  #pgbar{bottom:60px;font-size:5px;}
 }
 @media (max-width:380px){
   #intro h1{font-size:10px;}
@@ -152,7 +163,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Press Start 2P',mo
   <div class="il" style="color:#ffaaff;">🏰 REACH CASTLE: WIN!</div>
   <div class="il" style="color:#ffdd88;">🪙 COLLECT COINS: SCORE</div>
   <button id="sbtn" onclick="startGame()">▶ PRESS START</button>
-  <a href="https://drive.google.com/file/d/YOUR_RESUME_ID/view" target="_blank" style="color:#aaffaa;font-size:6px;text-decoration:none;border:2px solid #aaffaa;padding:6px 14px;margin-top:2px;letter-spacing:1px;" onmouseover="this.style.background='rgba(170,255,170,0.15)'" onmouseout="this.style.background='transparent'">📄 DOWNLOAD RESUME</a>
+  <a href="https://drive.google.com/file/d/1Za-32r8OoLeqYGGMqMhKs3Dg32ihRulm/view?usp=sharing" target="_blank" style="color:#aaffaa;font-size:6px;text-decoration:none;border:2px solid #aaffaa;padding:6px 14px;margin-top:2px;letter-spacing:1px;" onmouseover="this.style.background='rgba(170,255,170,0.15)'" onmouseout="this.style.background='transparent'">📄 DOWNLOAD RESUME</a>
   <div style="font-size:6px;color:#444;animation:blnk 1s step-end infinite;margin-top:4px;">© 2024 KHUSHI KABRA</div>
 </div>
 
@@ -393,7 +404,7 @@ var MD={
       +'🐙 github.com/khushik17<br>'
       +'💼 linkedin.com/in/khushi-kabra-368b8b2b3'
       +'</div>'
-      +'<button class="abtn g" style="margin-top:12px;width:100%;text-align:center;" onclick="window.open(\'https://drive.google.com/file/d/YOUR_RESUME_ID/view\',\'_blank\')">📄 DOWNLOAD RESUME</button>'
+      +'<button class="abtn g" style="margin-top:12px;width:100%;text-align:center;" onclick="window.open(\'https://drive.google.com/file/d/1Za-32r8OoLeqYGGMqMhKs3Dg32ihRulm/view?usp=sharing\',\'_blank\')">📄 DOWNLOAD RESUME</button>'
   },
 
   proj1:{
@@ -629,7 +640,8 @@ function loop(){
 
   wEl.style.transform='translateX('+(-camX)+'px)';
   mEl.style.left=mX+'px';
-  mEl.style.bottom='96px';
+  var groundBottom = window.innerWidth <= 600 ? '72px' : '96px';
+  mEl.style.bottom=groundBottom;
   mEl.style.transform=fR?'scaleX(1)':'scaleX(-1)';
 
   // Coin pickup — mario always at ground level
