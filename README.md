@@ -1,6 +1,12 @@
 # 🍄 Khushi Kabra — Mario Portfolio
 
 > A Super Mario themed interactive portfolio website built with pure HTML, CSS and JavaScript.
+
+![Mario Portfolio](https://img.shields.io/badge/Portfolio-Mario%20Style-red?style=for-the-badge&logo=nintendo)
+![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+
 ---
 
 ## 🎮 How to Play
@@ -53,6 +59,21 @@
 
 **Other:** Multer, Nodemailer, Cloudinary, Clerk Auth, Zod
 
+---
+
+## 📦 Deployment
+
+### Deploy on Vercel
+1. Push this repo to GitHub
+2. Go to [vercel.com](https://vercel.com)
+3. Click **Add New Project**
+4. Select this repository
+5. Click **Deploy** — done! 🚀
+
+### Deploy on Netlify
+1. Go to [netlify.com](https://netlify.com)
+2. Drag and drop `khushi-portfolio.html` file
+3. Live instantly! ✅
 
 ---
 
